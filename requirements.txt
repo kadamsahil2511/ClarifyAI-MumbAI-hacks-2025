@@ -1,0 +1,28 @@
+# Fact Checker Pro Chrome Extension - Python Dependencies
+
+# Core web framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# HTTP requests and web scraping
+requests==2.31.0
+beautifulsoup4==4.12.2
+
+# Google AI/Gemini API
+google-generativeai==0.3.2
+
+# Image processing
+Pillow==10.0.1
+
+# Web search capabilities
+duckduckgo-search==3.9.6
+
+# Environment management
+python-dotenv==1.0.0
+
+# Data processing
+urllib3==2.0.7
+
+# Optional: For enhanced functionality
+# selenium==4.15.2  # Uncomment if you need browser automation
+# opencv-python==4.8.1.78  # Uncomment for advanced image processing

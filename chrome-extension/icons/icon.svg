@@ -1,0 +1,27 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="64" cy="64" r="60" fill="url(#gradient)" stroke="#ffffff" stroke-width="4"/>
+  
+  <!-- Fact-check symbol (checkmark with magnifying glass) -->
+  <g transform="translate(64, 64)">
+    <!-- Magnifying glass -->
+    <circle cx="-8" cy="-8" r="16" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="4" y1="4" x2="12" y2="12" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Checkmark inside magnifying glass -->
+    <path d="M -16 -8 L -12 -4 L -4 -12" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Truth/False indicator dots -->
+    <circle cx="16" cy="-16" r="4" fill="#10b981"/>
+    <circle cx="16" cy="0" r="4" fill="#ef4444"/>
+    <circle cx="16" cy="16" r="4" fill="#f59e0b"/>
+  </g>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

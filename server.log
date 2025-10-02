@@ -1,0 +1,18 @@
+🚀 Starting Fact Checker Pro API Server...
+📁 Working directory: /Users/armaanmulani/Desktop/Extension_project
+✅ All agent files found!
+🌐 Server will run on http://127.0.0.1:5001
+🔧 Debug mode: False
+
+📋 Available endpoints:
+  GET  /api/health     - Health check
+  POST /api/fact-check - Main fact-checking
+  POST /api/search     - Web search
+  GET  /api/stats      - Usage statistics
+
+🎯 Ready to receive requests from Chrome extension!
+💡 Press Ctrl+C to stop the server
+ * Serving Flask app 'api_server'
+ * Debug mode: off
+Address already in use
+Port 5001 is in use by another program. Either identify and stop that program, or start the server with a different port.

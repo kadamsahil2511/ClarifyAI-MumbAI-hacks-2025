@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fact Checker Pro</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z" fill="#4F46E5"/>
+                </svg>
+                <h1>Fact Checker Pro</h1>
+            </div>
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span>Ready</span>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="text">Text</button>
+                <button class="tab-btn" data-tab="url">URL</button>
+                <button class="tab-btn" data-tab="image">Image</button>
+                <button class="tab-btn" data-tab="page">Current Page</button>
+            </div>
+
+            <!-- Text Input Tab -->
+            <div class="tab-content active" id="textTab">
+                <div class="input-group">
+                    <label for="textInput">Enter a claim to fact-check:</label>
+                    <textarea 
+                        id="textInput" 
+                        placeholder="e.g., The Earth is flat, Vaccines cause autism, etc."
+                        rows="3"
+                    ></textarea>
+                </div>
+                <button class="check-btn" id="checkTextBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Check Fact
+                </button>
+            </div>
+
+            <!-- URL Input Tab -->
+            <div class="tab-content" id="urlTab">
+                <div class="input-group">
+                    <label for="urlInput">Enter a URL to analyze:</label>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="https://example.com/article"
+                    />
+                </div>
+                <button class="check-btn" id="checkUrlBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 13C10.4295 13.5741 10.9774 14.0491 11.6066 14.3929C12.2357 14.7367 12.9315 14.9411 13.6467 14.9923C14.3618 15.0435 15.0796 14.9403 15.7513 14.6897C16.4231 14.4392 17.0331 14.047 17.54 13.54L20.54 10.54C21.4508 9.59695 21.9548 8.33394 21.9434 7.02296C21.932 5.71198 21.4061 4.45791 20.4791 3.53087C19.5521 2.60383 18.298 2.07799 16.987 2.0666C15.676 2.0552 14.413 2.55918 13.47 3.47L11.75 5.18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 11C13.5705 10.4259 13.0226 9.95086 12.3934 9.60712C11.7643 9.26339 11.0685 9.05895 10.3533 9.00775C9.63819 8.95655 8.92037 9.05973 8.24864 9.31028C7.5769 9.56082 6.9669 9.95301 6.46 10.46L3.46 13.46C2.54918 14.403 2.04520 15.6661 2.05660 16.977C2.06799 18.288 2.59383 19.5421 3.52087 20.4691C4.44791 21.3962 5.70198 21.922 7.01296 21.9334C8.32394 21.9448 9.58695 21.4408 10.53 20.53L12.24 18.82" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Analyze URL
+                </button>
+            </div>
+
+            <!-- Image Input Tab -->
+            <div class="tab-content" id="imageTab">
+                <div class="input-group">
+                    <label for="imageInput">Upload an image to fact-check:</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="imageInput" accept="image/*" />
+                        <div class="file-input-display" id="fileInputDisplay">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14.2639 15.9375L12.5958 14.2834C12.267 13.9583 11.7408 13.9583 11.4119 14.2834L9.74381 15.9375M12.0042 12.0042V21.0042M19.0042 12.0042C19.0042 17.5271 14.5271 22.0042 9.00416 22.0042C3.48124 22.0042 -1.99585 17.5271 -1.99585 12.0042C-1.99585 6.48124 3.48124 2.00416 9.00416 2.00416C14.5271 2.00416 19.0042 6.48124 19.0042 12.0042Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Click to upload image</span>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+                <button class="check-btn" id="checkImageBtn" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Check Image
+                </button>
+            </div>
+
+            <!-- Current Page Tab -->
+            <div class="tab-content" id="pageTab">
+                <div class="input-group">
+                    <label>Analyze current page for factual accuracy:</label>
+                    <div class="page-info" id="pageInfo">
+                        <div class="page-url" id="currentPageUrl">Loading...</div>
+                        <div class="page-title" id="currentPageTitle">Loading...</div>
+                    </div>
+                </div>
+                <button class="check-btn" id="checkPageBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Analyze Page
+                </button>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <span>Analyzing...</span>
+            </div>
+            
+            <div class="result-card" id="resultCard">
+                <div class="result-header">
+                    <div class="result-status" id="resultStatus">
+                        <div class="status-icon" id="statusIcon"></div>
+                        <span id="statusText">Unknown</span>
+                    </div>
+                    <div class="confidence-score" id="confidenceScore">
+                        <span class="score-label">Confidence:</span>
+                        <span class="score-value" id="scoreValue">--</span>
+                    </div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="claim" id="resultClaim"></div>
+                    <div class="explanation" id="resultExplanation"></div>
+                    
+                    <div class="sources" id="resultSources">
+                        <h4>Sources:</h4>
+                        <ul id="sourcesList"></ul>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="action-btn secondary" id="copyResultBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6C4 4.89543 4.89543 4 6 4H8M16 4C16 2.89543 15.1046 2 14 2H10C8.89543 2 8 2.89543 8 4M16 4C16 5.10457 15.1046 6 14 6H10C8.89543 6 8 5.10457 8 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Copy Result
+                    </button>
+                    <button class="action-btn secondary" id="shareResultBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12C9 11.518 8.886 11.062 8.684 10.658M8.684 13.342L15.316 17.658M8.684 13.342C7.72 14.298 6 13.396 6 12C6 10.604 7.72 9.702 8.684 10.658M15.316 17.658C15.114 18.062 15 18.518 15 19C15 20.396 16.72 21.298 17.684 20.342C18.648 19.386 18.648 17.614 17.684 16.658C16.72 15.702 15 16.604 15 18M15.316 17.658C16.28 16.702 18 17.604 18 19M8.684 10.658L15.316 6.342M15.316 6.342C15.114 5.938 15 5.482 15 5C15 3.604 16.72 2.702 17.684 3.658C18.648 4.614 18.648 6.386 17.684 7.342C16.72 8.298 15 7.396 15 6M15.316 6.342C16.28 7.298 18 6.396 18 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="settings-btn" id="settingsBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.325 4.317C10.751 2.561 13.249 2.561 13.675 4.317C13.7389 4.5808 13.8642 4.82578 14.0407 5.032C14.2172 5.23822 14.4399 5.39985 14.6907 5.50375C14.9414 5.60764 15.2132 5.65085 15.4838 5.62987C15.7544 5.60889 16.0162 5.5243 16.248 5.383C17.791 4.443 19.558 6.209 18.618 7.753C18.4769 7.98466 18.3924 8.24634 18.3715 8.51677C18.3506 8.78721 18.3938 9.05877 18.4975 9.30938C18.6013 9.55999 18.7627 9.78258 18.9687 9.95905C19.1747 10.1355 19.4194 10.2609 19.683 10.325C21.439 10.751 21.439 13.249 19.683 13.675C19.4192 13.7389 19.1742 13.8642 18.968 14.0407C18.7618 14.2172 18.6001 14.4399 18.4963 14.6907C18.3924 14.9414 18.3491 15.2132 18.3701 15.4838C18.3911 15.7544 18.4757 16.0162 18.617 16.248C19.557 17.791 17.791 19.558 16.247 18.618C16.0153 18.4769 15.7537 18.3924 15.4832 18.3715C15.2128 18.3506 14.9412 18.3938 14.6906 18.4975C14.44 18.6013 14.2174 18.7627 14.0409 18.9687C13.8645 19.1747 13.7391 19.4194 13.675 19.683C13.249 21.439 10.751 21.439 10.325 19.683C10.2611 19.4192 10.1358 19.1742 9.95929 18.968C9.7828 18.7618 9.56011 18.6001 9.30935 18.4963C9.05859 18.3924 8.78683 18.3491 8.51621 18.3701C8.24559 18.3911 7.98375 18.4757 7.752 18.617C6.209 19.557 4.442 17.791 5.382 16.247C5.5231 16.0153 5.60755 15.7537 5.62848 15.4832C5.64942 15.2128 5.60624 14.9412 5.50247 14.6906C5.3987 14.44 5.23726 14.2174 5.03127 14.0409C4.82529 13.8645 4.58056 13.7391 4.317 13.675C2.561 13.249 2.561 10.751 4.317 10.325C4.5808 10.2611 4.82578 10.1358 5.032 9.95929C5.23822 9.7828 5.39985 9.56011 5.50375 9.30935C5.60764 9.05859 5.65085 8.78683 5.62987 8.51621C5.60889 8.24559 5.5243 7.98375 5.383 7.752C4.443 6.209 6.209 4.442 7.753 5.382C7.98466 5.5231 8.24634 5.60755 8.51677 5.62848C8.78721 5.64942 9.05877 5.60624 9.30938 5.50247C9.55999 5.3987 9.78258 5.23726 9.95905 5.03127C10.1355 4.82529 10.2609 4.58056 10.325 4.317Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Settings
+            </div>
+            <div class="keyboard-shortcut">
+                <span>Press <kbd>Cmd/Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> to open</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
