@@ -1,271 +1,97 @@
-# Fact Checker Pro - Chrome Extension
+# ClarifyAI Chrome Extension (MVP)
+## 🎯 Goal
+Build trust on the web by giving users a single-click, context-aware truth layer driven by agentic reasoning. The MVP demonstrates how multiple specialised agents can collaborate through a shared API to deliver responsible, explainable verdicts inside a Chrome extension UI.
 
-A powerful AI-powered Chrome extension that instantly verifies claims, analyzes URLs, fact-checks images, and evaluates web pages for accuracy and misinformation.
+## 🧠 Agentic Flow
+| Stage | Agent | Responsibility |
+| --- | --- | --- |
+| 1 | **Popup Orchestrator** | Captures user intent (text / URL / image / current page) and dispatches the right task to the API server. |
+| 2 | **FactCheckerAPI (Flask)** | Routes the request to specialised agents, normalises responses, and enforces consistent output contracts. |
+| 3 | **Gemini Agents** | 
+|  | `Agnet.py` | Text claim reasoning & structured verdicts. |
+|  | `WebAgent.py` | URL crawling and contextual label generation. |
+|  | `ImageAgent.py` | Multimodal claim extraction with `gemini-2.5-pro`. |
+|  | `PageAnalyzer.py` | Full-page scrape, risk scoring, and issue detection. |
+| 4 | **UI Presenter** | Renders verdict, confidence, sources, issues, and recommendations inside the popup.
 
-## 🚀 Features
+Each agent runs independently but shares a unified schema (`is_correct`, `confidence_score`, `explanation`, `sources`, `issues_found`, `recommendation`) so the UX stays consistent regardless of modality.
 
-- **🔍 Text Fact-Checking**: Analyze any text claim for truthfulness
-- **🌐 URL Analysis**: Comprehensive analysis of web pages and articles
-- **📸 Image Verification**: Fact-check claims within images using AI vision
-- **📄 Page Analysis**: Real-time analysis of the current webpage
-- **⌨️ Keyboard Shortcuts**: Quick access with `Cmd/Ctrl + /`
-- **🎯 Context Menu Integration**: Right-click to fact-check selected content
-- **📊 Confidence Scoring**: Get reliability scores for all analyses
-- **🔗 Source Citations**: View supporting sources and references
-- **💾 History Tracking**: Keep track of your fact-checking history
+## 🚀 Key MVP Features
+- **Text Fact-Checks**: Enter any claim; receive a verdict, confidence, summary, and citations.
+- **URL Intelligence**: Paste an article link; the web agent analyses credibility, sources, and bias signals.
+- **Image Verification**: Upload an image; the multimodal agent extracts embedded claims and validates them.
+- **Current Page Audit**: One-click analyse for the active tab, highlighting misinformation risks and mitigation advice.
+- **History & Shareability**: Snapshot every result locally, copy/share highlights, and revisit previous checks.
+- **Live API Health Indicator**: Extension proactively warns when the local orchestrator is offline.
 
-## 📋 Prerequisites
-
-- **Python 3.8+** installed on your system
-- **Chrome Browser** (version 88+)
-- **Internet connection** for AI processing and web searches
-
-## 🛠️ Installation & Setup
-
-### Step 1: Install Python Dependencies
-
-```bash
-# Navigate to the project directory
-cd /Users/armaanmulani/Desktop/Extension_project
-
-# Install required Python packages
-pip install -r requirements.txt
-```
-
-### Step 2: Start the API Server
-
-```bash
-# Start the Flask API server
-python3 api_server.py
-```
-
-The server will start on `http://localhost:5000` and display:
-```
-🚀 Starting Fact Checker Pro API Server...
-✅ All agent files found!
-🌐 Server will run on http://127.0.0.1:5000
-🎯 Ready to receive requests from Chrome extension!
-```
-
-### Step 3: Install Chrome Extension
-
-1. **Open Chrome** and navigate to `chrome://extensions/`
-
-2. **Enable Developer Mode** (toggle in top-right corner)
-
-3. **Load Unpacked Extension**:
-   - Click "Load unpacked"
-   - Select the `chrome-extension` folder from this project
-   - The extension should appear in your extensions list
-
-4. **Pin the Extension** (optional):
-   - Click the puzzle piece icon in Chrome toolbar
-   - Pin "Fact Checker Pro" for easy access
-
-## 🎯 Usage
-
-### Keyboard Shortcut
-- **macOS**: `Cmd + Shift + F`
-- **Windows/Linux**: `Ctrl + Shift + F`
-
-Press the shortcut anywhere in Chrome to open the fact-checker popup.
-
-### Extension Popup
-Click the extension icon in the toolbar to open the interface with four tabs:
-
-#### 📝 Text Tab
-- Enter any claim or statement
-- Get instant fact-checking with confidence scores
-- View supporting sources and explanations
-
-#### 🔗 URL Tab
-- Paste any URL for comprehensive analysis
-- Evaluate credibility and potential misinformation
-- Get detailed page assessment reports
-
-#### 📷 Image Tab
-- Upload images containing text claims
-- AI vision extracts and fact-checks textual content
-- Supports JPG, PNG, GIF, and WebP formats
-
-#### 📄 Current Page Tab
-- Analyze the webpage you're currently viewing
-- Get real-time credibility assessment
-- Identify potential misinformation or bias
-
-### Context Menu (Right-Click)
-- **Selected Text**: Right-click selected text → "Fact-check selected text"
-- **Links**: Right-click any link → "Fact-check this link"
-- **Images**: Right-click images → "Fact-check this image"
-- **Page**: Right-click anywhere → "Fact-check this page"
-
-## 🔧 Configuration
-
-### API Keys
-Your existing agents already include API keys. If you need to update them:
-
-1. **Gemini API Key**: Update in `Agnet.py`, `ImageAgent.py`, `WebAgent.py`
-2. **Environment Variables**: Create `.env` file with:
+## 🛠️ Getting Set Up (Local Qualifier Demo)
+1. **Install dependencies**
+   ```bash
+   cd /pathto/Extension
+   pip install -r requirements.txt
    ```
-   GEMINI_API_KEY=your_api_key_here
+2. **Configure environment**
+   - Create `.env` in project root with a valid `GEMINI_API_KEY` (usable across agents).
+   - Optional: override `GEMINI_IMAGE_MODEL` if you have a different multimodal tier.
+3. **Start the agent server**
+   ```bash
+   sh start_server.sh
    ```
+   The Flask API boots on `http://127.0.0.1:5001` and exposes `/api/fact-check`, `/api/health`, `/api/search`, `/api/stats`.
+4. **Load the Chrome extension**
+   - `chrome://extensions` → enable *Developer Mode* → *Load unpacked* → select the `chrome-extension` folder.
+   - Pin the ClarifyAI icon for quick access.
 
-### Server Settings
-Modify `api_server.py` for custom configuration:
-```python
-# Change port (default: 5000)
-port = int(os.environ.get('PORT', 5000))
+## 🧭 Using the MVP
+1. Open the popup (`Cmd/Ctrl + Shift + F` or toolbar icon).
+2. Choose a tab:
+   - **Text** – paste a claim, press *Check Fact*.
+   - **URL** – drop in a link, press *Analyze URL*.
+   - **Image** – upload a file, press *Check Image*.
+   - **Current Page** – press *Analyze Page* to audit the active tab.
+3. Review the verdict card:
+   - Status (True / False / Misleading / Review)
+   - Confidence percentage
+   - Narrative explanation + recommendation
+   - Issues found (type, severity, evidence)
+   - Normalised source list with outbound links
+4. Copy/share summary or browse previous results in the history sidebar (future iteration).
 
-# Change host (default: 127.0.0.1)
-host = os.environ.get('HOST', '127.0.0.1')
-
-# Enable debug mode
-debug = os.environ.get('DEBUG', 'False').lower() == 'true'
+## 📦 Project Layout (Extension Slice)
 ```
-
-## 📁 Project Structure
-
+chrome-extension/
+├── manifest.json          # MV3 configuration
+├── popup.html             # Multi-tab MVP UI
+├── popup.js               # UI orchestrator & API client
+├── popup.css              # Dark-mode design system
+├── background.js          # Hotkey + context menu bridge
+├── content.js             # On-page agent hooks (future work)
+└── README.md              # This document
 ```
-Extension_project/
-├── chrome-extension/           # Chrome extension files
-│   ├── manifest.json          # Extension configuration
-│   ├── popup.html            # Main interface
-│   ├── popup.js              # Frontend logic
-│   ├── popup.css             # Styling
-│   ├── background.js         # Background script
-│   ├── content.js            # Content script
-│   ├── content.css           # Content styles
-│   └── icons/                # Extension icons
-│       ├── icon16.png
-│       ├── icon32.png
-│       ├── icon48.png
-│       └── icon128.png
-├── api_server.py             # Flask API server
-├── requirements.txt          # Python dependencies
-├── create_icons.py          # Icon generation script
-├── Agnet.py                 # Main fact-checking agent
-├── WebAgent.py              # Web search agent
-├── ImageAgent.py            # Image analysis agent
-├── PageAnalyzer.py          # Page analysis agent
-├── GoogleSearchAgent.py     # Search functionality
-├── research.py              # Research utilities
-└── README.md               # This file
-```
+Backend agents live one level up, keeping browser code lean and secure.
 
-## 🔍 API Endpoints
+## ✅ MVP Completion Criteria
+- Works entirely offline except for calls to Gemini APIs.
+- Handles text, URL, image, and current-page checks with consistent UX.
+- Gracefully reports API downtime and rate-limit errors (429s).
+- Stores results locally (`chrome.storage`) for auditability.
 
-The Flask server provides these endpoints:
+## 🚧 Known Constraints
+- Gemini quota may throttle heavy usage (returns HTTP 429).
+- Page analysis depends on accessible HTML (paywalled or heavily scripted sites may degrade output).
+- Multimodal agent currently supports single-image uploads; batch mode is deferred to finals.
 
-- `GET /api/health` - Health check and status
-- `POST /api/fact-check` - Main fact-checking endpoint
-- `POST /api/search` - Web search functionality
-- `GET /api/stats` - Usage statistics
+## 🔭 Roadmap for Final Round
+1. Autonomous browsing agent to gather counter-evidence.
+2. Collaborative UI that suggests follow-up questions driven by agent reasoning traces.
+3. Inline annotations injected into the DOM via `content.js` for transparent fact labels.
+4. Prompt hardening + retrieval augmentation to mitigate hallucinations.
+5. Packaging for installable beta release with opt-in telemetry.
 
-### Example API Usage
-
-```javascript
-// Fact-check text
-fetch('http://localhost:5000/api/fact-check', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    type: 'text',
-    data: { text: 'The Earth is flat' }
-  })
-})
-```
-
-## 🐛 Troubleshooting
-
-### Extension Not Loading
-- Ensure Developer Mode is enabled in Chrome
-- Check that all files are in the `chrome-extension` folder
-- Look for errors in `chrome://extensions/` (click "Errors" if present)
-
-### API Server Issues
-- Verify Python dependencies are installed: `pip list`
-- Check if port 5000 is available: `lsof -i :5000`
-- Review server logs for error messages
-
-### Keyboard Shortcut Not Working
-- Check if another extension uses the same shortcut
-- Go to `chrome://extensions/shortcuts` to modify shortcuts
-- Ensure the extension has necessary permissions
-
-### Fact-Checking Not Working
-- Verify API server is running on `http://localhost:5000`
-- Check internet connection for AI API calls
-- Review browser console for JavaScript errors (F12 → Console)
-
-## 🔒 Privacy & Security
-
-- **Local Processing**: The extension communicates only with your local API server
-- **No Data Collection**: No personal data is stored or transmitted to third parties
-- **API Keys**: Your AI API keys remain on your local machine
-- **HTTPS Support**: Extension works on both HTTP and HTTPS sites
-
-## 🚀 Advanced Usage
-
-### Custom Agents
-You can modify the existing Python agents to customize fact-checking behavior:
-
-- **Agnet.py**: Main fact-checking logic
-- **PageAnalyzer.py**: Web page analysis
-- **ImageAgent.py**: Image processing
-- **WebAgent.py**: Web search integration
-
-### Extension Customization
-Modify the extension interface by editing:
-
-- **popup.html**: Change UI structure
-- **popup.css**: Customize styling and themes
-- **popup.js**: Add new functionality
-
-### Deployment
-For production deployment:
-
-1. **Server**: Deploy `api_server.py` to a cloud service
-2. **Extension**: Update API endpoint in `popup.js`
-3. **Distribution**: Package extension for Chrome Web Store
-
-## 📊 Performance
-
-- **Response Time**: Typically 2-5 seconds for text analysis
-- **Accuracy**: Depends on AI model and source quality
-- **Resource Usage**: Minimal impact on browser performance
-- **Offline Mode**: Extension UI works offline, but fact-checking requires internet
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is for educational and personal use. Please ensure compliance with:
-- Chrome Extension policies
-- AI API terms of service
-- Web scraping best practices
-
-## 🆘 Support
-
-If you encounter issues:
-
-1. Check the troubleshooting section above
-2. Review server and browser console logs
-3. Ensure all dependencies are properly installed
-4. Verify API keys are valid and have sufficient quota
-
-## 🎉 Acknowledgments
-
-- Built with Google's Gemini AI for fact-checking
-- Uses Flask for the API server
-- Chrome Extension APIs for browser integration
-- Beautiful UI inspired by modern design principles
+## 🧑‍⚖️ Compliance & Ethics
+- No user data leaves the device except requests to Gemini.
+- Sources are cited; explanations emphasise evidence over assertion.
+- Designed with transparency controls (confidence, recommendations, issues) to avoid black-box verdicts.
 
 ---
-
-**Happy Fact-Checking! 🕵️‍♂️✅**
+**ClarifyAI** demonstrates how agentic AI can reinforce digital trust with minimal friction. This MVP proves the multi-agent architecture, while the final round will focus on deeper autonomy, richer evidence surfacing, and cooperative research loops.
