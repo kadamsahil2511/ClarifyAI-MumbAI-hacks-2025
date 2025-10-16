@@ -381,7 +381,7 @@ def main():
         print("✅ All agent files found!")
     
     # Get port from environment or use default
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5001))
     host = os.environ.get('HOST', '127.0.0.1')
     debug = os.environ.get('DEBUG', 'False').lower() == 'true'
     
