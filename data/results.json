@@ -24,5 +24,18 @@
     "explanation": "The text featured in the articles of this newspaper is 'Lorem ipsum', which is a standard placeholder or 'dummy' text used in the graphic design and publishing industries. It is not a real news article. 'Lorem ipsum' is derived from a 1st-century BC Latin text by Cicero and is used to fill space and demonstrate the visual form of a document or typeface without relying on meaningful content. Its presence is a clear indicator that this image is a design template, not an actual published newspaper. Additionally, the website listed, 'reallygreatsite.com', is a common placeholder domain used in templates from the design platform Canva.",
     "image_description": "A vintage-style newspaper front page template titled 'THE SOCIETY'. It features the date '12 March 2026', a headline 'BREAKING NEWS', and a sub-headline 'UNITY: THE ESSENCE OF SOCIETY IMPACT'. The body of the articles consists of 'Lorem ipsum' placeholder text. A black and white photo of a historic city street, appearing to be Ludgate Hill in London with St. Paul's Cathedral in the background, is also included.",
     "source_type": "image"
+  },
+  {
+    "claim": "The image shows former US President Donald Trump kissing the feet of Elon Musk.",
+    "is_correct": false,
+    "confidence_score": 100,
+    "category": "Politics / Misinformation",
+    "sources": [
+      "https://www.reuters.com/article/idUSKCN0VN0G0/",
+      "https://www.snopes.com/fact-check/trump-kissing-babies-feet/"
+    ],
+    "explanation": "This image is a digital fabrication. The original, unaltered photograph shows Donald Trump during a 2016 campaign rally in South Carolina, where he is kissing a baby being held up from the crowd. The image has been manipulated by replacing the baby with a cutout of Elon Musk and his feet. The presence of a green screen background further indicates that this is a composite image created for satirical or misinformation purposes. There is no credible record of such an event between Donald Trump and Elon Musk ever taking place.",
+    "image_description": "A digitally manipulated image depicting former US President Donald Trump in a suit, leaning down to kiss the bare feet of a seated Elon Musk. The background is a solid bright green, characteristic of a chroma key background used in video and image editing.",
+    "source_type": "image"
   }
 ]
