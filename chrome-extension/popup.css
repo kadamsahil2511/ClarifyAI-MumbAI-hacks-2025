@@ -397,6 +397,43 @@ input[type="file"] {
     line-height: 1.6;
 }
 
+.issues {
+    margin-bottom: 16px;
+    display: none;
+}
+
+.issues h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.issue-item {
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    background: #1a1a1a;
+}
+
+.issue-item strong {
+    color: #1DB954;
+}
+
+.recommendation {
+    font-size: 13px;
+    color: #1DB954;
+    margin-bottom: 16px;
+    font-weight: 500;
+    display: none;
+}
+
 .sources h4 {
     font-size: 14px;
     font-weight: 600;

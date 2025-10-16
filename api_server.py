@@ -86,21 +86,12 @@ class FactCheckerAPI:
             return self.format_response(success=False, error=str(e))
 
     def process_url_analysis(self, url):
-        """Process URL analysis using PageAnalyzer"""
+        """Process URL analysis using WebAgent"""
         try:
             self.log_request("URL_ANALYSIS", url)
-            
-            if page_analyzer:
-                # Use PageAnalyzer for comprehensive analysis
-                result = page_analyzer.analyze_page(url)
-            else:
-                # Fallback to basic fact checker
-                result = fact_checker_agent(url)
-            
+            result = web_fact_checker(url)
             standardized = self.standardize_result(result, "url")
-            
             return self.format_response(success=True, data=standardized)
-            
         except Exception as e:
             logger.error(f"Error analyzing URL: {e}")
             return self.format_response(success=False, error=str(e))
@@ -110,29 +101,15 @@ class FactCheckerAPI:
         try:
             self.log_request("IMAGE_ANALYSIS", f"Image: {filename}")
             
-            # Handle base64 image data
             if image_data.startswith('data:'):
-                # Extract base64 data from data URL
                 header, data = image_data.split(',', 1)
                 if not mime_type:
                     mime_type = header.split(':')[1].split(';')[0]
             else:
                 data = image_data
             
-            # Create temporary file for image processing
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
-                try:
-                    # Decode base64 and save to temp file
-                    image_bytes = base64.b64decode(data)
-                    tmp_file.write(image_bytes)
-                    tmp_file.flush()
-                    
-                    # Process with ImageAgent
-                    result = process_image(tmp_file.name)
-                    
-                finally:
-                    # Clean up temp file
-                    os.unlink(tmp_file.name)
+            # Directly use the base64 data with the updated ImageAgent
+            result = process_image(image_data=data, mime_type=mime_type)
             
             standardized = self.standardize_result(result, "image")
             
@@ -150,8 +127,8 @@ class FactCheckerAPI:
             if page_analyzer:
                 result = page_analyzer.analyze_page(url)
             else:
-                # Fallback to URL fact checking
-                result = fact_checker_agent(url)
+                # Fallback to URL fact checking with WebAgent
+                result = web_fact_checker(url)
             
             standardized = self.standardize_result(result, "page")
             
@@ -176,8 +153,30 @@ class FactCheckerAPI:
 
     def standardize_result(self, result, source_type):
         """Standardize different agent results into a common format"""
+        if isinstance(result, str):
+            try:
+                # If the result is a string, it's likely a JSON string from one of the agents.
+                result = json.loads(result)
+            except json.JSONDecodeError:
+                # If it's not a valid JSON string, treat it as an error or a simple message.
+                return {
+                    "source_type": source_type,
+                    "explanation": result,
+                    "is_correct": None,
+                    "confidence_score": 0,
+                    "sources": [],
+                    "error": "Received non-JSON response from agent."
+                }
+
         if isinstance(result, dict) and "error" in result:
-            raise Exception(result["error"])
+            return {
+                "source_type": source_type,
+                "explanation": result.get("error"),
+                "is_correct": None,
+                "confidence_score": 0,
+                "sources": [],
+                "error": result.get("error")
+            }
         
         standardized = {
             "source_type": source_type,
@@ -186,40 +185,37 @@ class FactCheckerAPI:
         
         # Handle different result formats from your agents
         if isinstance(result, dict):
-            # Copy common fields
-            for field in ["claim", "is_correct", "confidence_score", "category", 
-                         "sources", "explanation", "is_misleading", "overall_credibility_score",
-                         "fact_check_summary", "analyzed_title", "analyzed_url", "query"]:
-                if field in result:
-                    standardized[field] = result[field]
+            # Direct mapping
+            standardized["claim"] = result.get("claim") or result.get("analyzed_title")
+            standardized["is_correct"] = result.get("is_correct")
+            standardized["confidence_score"] = result.get("confidence_score") or result.get("overall_credibility_score")
+            standardized["category"] = result.get("category")
+            standardized["sources"] = result.get("sources", [])
+            standardized["explanation"] = result.get("explanation") or result.get("fact_check_summary")
+            standardized["query"] = result.get("query")
+
+            # PageAnalyzer specific fields
+            standardized["risk_level"] = result.get("risk_level")
+            standardized["issues_found"] = result.get("issues_found")
+            standardized["recommendation"] = result.get("recommendation")
+            standardized["analyzed_url"] = result.get("analyzed_url")
             
-            # Handle PageAnalyzer specific fields
-            if "risk_level" in result:
-                standardized["risk_level"] = result["risk_level"]
-            if "issues_found" in result:
-                standardized["issues_found"] = result["issues_found"]
-            if "recommendation" in result:
-                standardized["recommendation"] = result["recommendation"]
+            # ImageAgent specific fields
+            standardized["image_description"] = result.get("image_description")
+
+            # Coalesce fields to ensure frontend gets what it needs
+            if standardized.get("is_misleading") is not None and standardized.get("is_correct") is None:
+                standardized["is_correct"] = not result["is_misleading"]
+
+            # Ensure required fields have defaults
+            if standardized.get("confidence_score") is None:
+                standardized["confidence_score"] = 0
             
-            # Handle ImageAgent specific fields
-            if "image_description" in result:
-                standardized["image_description"] = result["image_description"]
-            
-            # Ensure we have required fields with defaults
-            if "is_correct" not in standardized and "is_misleading" in standardized:
-                standardized["is_correct"] = not standardized["is_misleading"]
-            
-            if "confidence_score" not in standardized and "overall_credibility_score" in standardized:
-                standardized["confidence_score"] = standardized["overall_credibility_score"]
-            
-            if "explanation" not in standardized and "fact_check_summary" in standardized:
-                standardized["explanation"] = standardized["fact_check_summary"]
-            
-            if "sources" not in standardized:
-                standardized["sources"] = []
-                
+            if not standardized.get("explanation"):
+                 standardized["explanation"] = "No detailed explanation provided."
+
         else:
-            # Handle non-dict results
+            # Handle non-dict results (fallback)
             standardized["explanation"] = str(result)
             standardized["is_correct"] = None
             standardized["confidence_score"] = 0
@@ -273,6 +269,7 @@ def fact_check():
                 
         elif check_type == 'url':
             if 'url' in check_data:
+                # Use WebAgent for simple URL checks
                 result = api_handler.process_url_analysis(check_data['url'])
             else:
                 return jsonify(api_handler.format_response(
@@ -293,6 +290,7 @@ def fact_check():
                 
         elif check_type == 'page':
             if 'url' in check_data:
+                # Use PageAnalyzer for full page analysis
                 result = api_handler.process_page_analysis(check_data['url'])
             else:
                 return jsonify(api_handler.format_response(

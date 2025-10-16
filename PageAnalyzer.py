@@ -4,6 +4,7 @@ Page Analyzer for REACTOR
 Analyzes web pages for factual accuracy and misleading content
 """
 
+import os
 import sys
 import json
 import requests
@@ -13,11 +14,18 @@ from urllib.parse import urlparse, urljoin
 import re
 import time
 from typing import Dict, List, Any
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBowNftE-G8V_grQ9hZXiCwfsDa6B47FLs")
+if not GEMINI_API_KEY:
+    raise EnvironmentError("GEMINI_API_KEY not configured for PageAnalyzer.")
 
 class PageAnalyzer:
     def __init__(self):
         # Configure Gemini API
-        genai.configure(api_key="AIzaSyBkHSSZ9GGWNpL6KkMqNmhKlZKzK6TLX8k")
+        genai.configure(api_key=GEMINI_API_KEY)
         self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
         
         self.headers = {

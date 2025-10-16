@@ -1,0 +1,28 @@
+[
+  {
+    "error": "Failed to fetch or parse API response: 404 Client Error: Not Found for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent",
+    "source_type": "image"
+  },
+  {
+    "error": "Failed to fetch or parse API response: 429 Client Error: Too Many Requests for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+    "source_type": "image"
+  },
+  {
+    "error": "Failed to fetch or parse API response: 503 Server Error: Service Unavailable for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
+    "source_type": "image"
+  },
+  {
+    "claim": "The text presented in the newspaper article, beginning with 'Lorem ipsum dolor sit amet...', is a factual news report about 'Unity: The Essence of Society Impact'.",
+    "is_correct": false,
+    "confidence_score": 100,
+    "category": "Media",
+    "sources": [
+      "https://www.lipsum.com/",
+      "https://en.wikipedia.org/wiki/Lorem_ipsum",
+      "https://www.canva.com/templates/?q=reallygreatsite.com"
+    ],
+    "explanation": "The text featured in the articles of this newspaper is 'Lorem ipsum', which is a standard placeholder or 'dummy' text used in the graphic design and publishing industries. It is not a real news article. 'Lorem ipsum' is derived from a 1st-century BC Latin text by Cicero and is used to fill space and demonstrate the visual form of a document or typeface without relying on meaningful content. Its presence is a clear indicator that this image is a design template, not an actual published newspaper. Additionally, the website listed, 'reallygreatsite.com', is a common placeholder domain used in templates from the design platform Canva.",
+    "image_description": "A vintage-style newspaper front page template titled 'THE SOCIETY'. It features the date '12 March 2026', a headline 'BREAKING NEWS', and a sub-headline 'UNITY: THE ESSENCE OF SOCIETY IMPACT'. The body of the articles consists of 'Lorem ipsum' placeholder text. A black and white photo of a historic city street, appearing to be Ludgate Hill in London with St. Paul's Cathedral in the background, is also included.",
+    "source_type": "image"
+  }
+]

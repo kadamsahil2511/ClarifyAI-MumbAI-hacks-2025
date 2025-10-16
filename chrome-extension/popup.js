@@ -153,10 +153,10 @@ Answer with just one word: TRUE or FALSE`;
         const text = indicator.querySelector('span');
 
         if (isConnected) {
-            dot.style.background = '#10b981';
+            dot.style.background = 'var(--success-color)';
             text.textContent = 'Ready';
         } else {
-            dot.style.background = '#ef4444';
+            dot.style.background = 'var(--error-color)';
             text.textContent = 'API Offline';
         }
     }
@@ -244,21 +244,25 @@ Answer with just one word: TRUE or FALSE`;
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
             }
 
             const apiResponse = await response.json();
             
-            // Extract the actual fact-check data from the API response
-            const result = apiResponse.success ? apiResponse.data : apiResponse;
-            await this.displayResult(result);
+            if (!apiResponse.success) {
+                throw new Error(apiResponse.error || 'API returned an unsuccessful response.');
+            }
+
+            const result = apiResponse.data;
+            this.displayResult(result);
 
             // Save to storage for history
             this.saveToHistory(type, data, result);
 
         } catch (error) {
             console.error('Fact check error:', error);
-            this.showError('Failed to perform fact check. Please check your connection and try again.');
+            this.showError(`Fact check failed: ${error.message}`);
         } finally {
             this.isLoading = false;
             this.hideLoading();
@@ -267,25 +271,32 @@ Answer with just one word: TRUE or FALSE`;
 
     showLoading() {
         const resultsSection = document.getElementById('resultsSection');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loader = document.getElementById('loadingIndicator');
         const resultCard = document.getElementById('resultCard');
 
-        resultsSection.classList.add('show');
-        loadingIndicator.style.display = 'flex';
-        resultCard.classList.remove('show');
+        if (resultsSection) {
+            resultsSection.style.display = 'block';
+        }
 
-        // Disable all check buttons
+        if (loader) {
+            loader.style.display = 'flex';
+        }
+
+        if (resultCard) {
+            resultCard.classList.remove('show');
+        }
+
         document.querySelectorAll('.check-btn').forEach(btn => {
             btn.disabled = true;
         });
     }
 
     hideLoading() {
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        
-        loadingIndicator.style.display = 'none';
+        const loader = document.getElementById('loadingIndicator');
+        if (loader) {
+            loader.style.display = 'none';
+        }
 
-        // Re-enable check buttons
         document.querySelectorAll('.check-btn').forEach(btn => {
             btn.disabled = false;
         });
@@ -294,134 +305,192 @@ Answer with just one word: TRUE or FALSE`;
     hideResults() {
         const resultsSection = document.getElementById('resultsSection');
         const resultCard = document.getElementById('resultCard');
-        
-        resultsSection.classList.remove('show');
-        resultCard.classList.remove('show');
+
+        if (resultsSection) {
+            resultsSection.style.display = 'none';
+        }
+
+        if (resultCard) {
+            resultCard.classList.remove('show');
+        }
     }
 
-    async displayResult(result) {
-        const resultCard = document.getElementById('resultCard');
-        const statusIcon = document.getElementById('statusIcon');
+    displayResult(result) {
         const statusText = document.getElementById('statusText');
+        const statusIcon = document.getElementById('statusIcon');
         const scoreValue = document.getElementById('scoreValue');
+        const resultCard = document.getElementById('resultCard');
         const resultClaim = document.getElementById('resultClaim');
         const resultExplanation = document.getElementById('resultExplanation');
+        const issuesContainer = document.getElementById('resultIssues');
+        const issuesList = document.getElementById('issuesList');
+        const recommendation = document.getElementById('resultRecommendation');
         const sourcesList = document.getElementById('sourcesList');
+        const resultsSection = document.getElementById('resultsSection');
+        const loader = document.getElementById('loadingIndicator');
 
-        // Determine status based on available data
-        let status = 'unknown';
-        let statusLabel = 'Analysis Complete';
-        
-        // Check for explicit correctness indicators first
+        if (resultsSection) {
+            resultsSection.style.display = 'block';
+        }
+
+        if (loader) {
+            loader.style.display = 'none';
+        }
+
+        if (resultCard) {
+            resultCard.classList.add('show');
+        }
+
+        const { verdictClass, verdictLabel } = this.getVerdictDetails(result);
+
+        if (statusText) {
+            statusText.textContent = verdictLabel;
+        }
+
+        if (statusIcon) {
+            statusIcon.className = `status-icon ${verdictClass}`;
+        }
+
+        const confidence = this.getConfidenceScore(result);
+        if (scoreValue) {
+            scoreValue.textContent = `${confidence}%`;
+        }
+
+        if (resultClaim) {
+            resultClaim.textContent = this.getDisplayClaim(result);
+        }
+
+        if (resultExplanation) {
+            resultExplanation.textContent = this.getExplanation(result);
+        }
+
+        this.renderIssues(result, issuesContainer, issuesList);
+        this.renderRecommendation(result, recommendation);
+        this.renderSources(result.sources || [], sourcesList);
+
+        this.currentResult = result;
+    }
+
+    getVerdictDetails(result) {
         if (result.is_correct === true) {
-            status = 'true';
-            statusLabel = 'True';
-        } else if (result.is_correct === false) {
-            status = 'false';
-            statusLabel = 'False';
-        } else if (result.is_misleading === true) {
-            status = 'false';
-            statusLabel = 'Misleading';
-        } else if (result.is_misleading === false) {
-            status = 'true';
-            statusLabel = 'Reliable';
-        } else if (result.explanation) {
-            // Use AI to analyze the explanation and determine the verdict
-            try {
-                const aiAnalysis = await this.analyzeExplanationWithAI(result.explanation, result.claim || result.query);
-                console.log('AI Analysis Result:', aiAnalysis);
-                
-                if (aiAnalysis.verdict === 'false') {
-                    status = 'false';
-                    statusLabel = 'False';
-                } else if (aiAnalysis.verdict === 'true') {
-                    status = 'true';
-                    statusLabel = 'True';
-                } else {
-                    status = 'unknown';
-                    statusLabel = 'Cannot Determine';
-                }
-            } catch (error) {
-                console.error('AI analysis failed, using simple text analysis:', error);
-                
-                // Fallback to simple text analysis
-                const explanation = result.explanation.toLowerCase();
-                
-                // Look for strong debunking language
-                if (explanation.includes('false') || explanation.includes('wrong') || 
-                    explanation.includes('myth') || explanation.includes('debunked') ||
-                    explanation.includes('refuted') || explanation.includes('retracted') ||
-                    explanation.includes('no evidence') || explanation.includes('fraudulent')) {
-                    status = 'false';
-                    statusLabel = 'False';
-                } 
-                // Look for strong supporting language
-                else if (explanation.includes('true') || explanation.includes('correct') ||
-                         explanation.includes('confirmed') || explanation.includes('proven') ||
-                         explanation.includes('evidence shows') || explanation.includes('established')) {
-                    status = 'true';
-                    statusLabel = 'True';
-                }
-                // Use confidence score as final fallback
-                else if (result.confidence_score >= 85) {
-                    status = 'true';
-                    statusLabel = 'True';
-                } else if (result.confidence_score <= 25) {
-                    status = 'false';
-                    statusLabel = 'False';
-                } else {
-                    status = 'unknown';
-                    statusLabel = 'Cannot Determine';
+            return { verdictClass: 'true', verdictLabel: 'True' };
+        }
+
+        if (result.is_correct === false || result.is_misleading === true) {
+            const label = result.is_misleading ? 'Misleading' : 'False';
+            return { verdictClass: 'false', verdictLabel: label };
+        }
+
+        return { verdictClass: 'unknown', verdictLabel: 'Review' };
+    }
+
+    getConfidenceScore(result) {
+        const scores = [
+            result.confidence_score,
+            result.overall_credibility_score,
+            result.confidence,
+        ].filter(score => typeof score === 'number');
+
+        if (scores.length === 0) {
+            return 0;
+        }
+
+        const score = Math.max(...scores);
+        return Math.round(score);
+    }
+
+    getDisplayClaim(result) {
+        return result.claim || result.query || result.analyzed_title || 'Fact Check Analysis';
+    }
+
+    getExplanation(result) {
+        return result.explanation || result.fact_check_summary || 'No detailed explanation provided.';
+    }
+
+    escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    renderIssues(result, container, listElement) {
+        const issues = result.issues_found || [];
+        if (!container || !listElement) {
+            return;
+        }
+
+        if (!issues.length) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        listElement.innerHTML = issues.map(issue => {
+            const typeRaw = issue.type ? issue.type.replace(/_/g, ' ') : 'Issue';
+            const severityRaw = issue.severity ? String(issue.severity).toUpperCase() : 'UNKNOWN';
+            const descriptionRaw = issue.description || 'No description provided.';
+            const evidenceRaw = issue.evidence ? String(issue.evidence) : '';
+
+            const type = this.escapeHtml(typeRaw);
+            const severity = this.escapeHtml(severityRaw);
+            const description = this.escapeHtml(descriptionRaw).replace(/\n/g, '<br />');
+            const evidence = evidenceRaw ? `<p>${this.escapeHtml(evidenceRaw).replace(/\n/g, '<br />')}</p>` : '';
+            return `
+                <div class="issue-item">
+                    <strong>${type} • ${severity}</strong>
+                    <p>${description}</p>
+                    ${evidence}
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderRecommendation(result, element) {
+        if (!element) {
+            return;
+        }
+
+        if (!result.recommendation) {
+            element.textContent = '';
+            element.style.display = 'none';
+            return;
+        }
+
+        element.style.display = 'block';
+        element.textContent = `Recommendation: ${result.recommendation}`;
+    }
+
+    renderSources(sources, listElement) {
+        if (!listElement) {
+            return;
+        }
+
+        if (!sources.length) {
+            listElement.innerHTML = '<li>No sources provided</li>';
+            return;
+        }
+
+        listElement.innerHTML = sources.map(source => {
+            if (typeof source === 'string' && this.isValidUrl(source)) {
+                try {
+                    const urlObj = new URL(source);
+                    const safeHref = urlObj.toString();
+                    const label = this.escapeHtml(this.formatUrl(safeHref));
+                    return `<li><a href="${safeHref}" target="_blank" rel="noopener noreferrer">${label}</a></li>`;
+                } catch (error) {
+                    // Fall through to render as text if URL parsing fails
                 }
             }
-        }
-
-        // Update status display
-        statusIcon.className = `status-icon ${status}`;
-        statusText.textContent = statusLabel;
-        statusText.parentElement.className = `result-status ${status}`;
-
-        // Update confidence score
-        const confidence = result.confidence_score || result.overall_credibility_score || 0;
-        scoreValue.textContent = `${confidence}%`;
-
-        // Update claim
-        const claim = result.claim || result.query || result.analyzed_title || 'Fact Check Analysis';
-        resultClaim.textContent = claim;
-
-        // Update explanation
-        const explanation = result.explanation || result.fact_check_summary || result.summary || 'Analysis completed successfully.';
-        resultExplanation.textContent = explanation;
-
-        // Update sources
-        sourcesList.innerHTML = '';
-        const sources = result.sources || [];
-        
-        if (sources.length > 0) {
-            sources.forEach(source => {
-                const li = document.createElement('li');
-                if (this.isValidUrl(source)) {
-                    const a = document.createElement('a');
-                    a.href = source;
-                    a.textContent = this.formatUrl(source);
-                    a.target = '_blank';
-                    li.appendChild(a);
-                } else {
-                    li.textContent = source;
-                }
-                sourcesList.appendChild(li);
-            });
-        } else {
-            const li = document.createElement('li');
-            li.textContent = 'No sources provided';
-            sourcesList.appendChild(li);
-        }
-
-        // Show result card
-        resultCard.classList.add('show');
-        
-        // Store current result for actions
-        this.currentResult = result;
+            const fallback = this.escapeHtml(source);
+            return `<li>${fallback}</li>`;
+        }).join('');
     }
 
     showError(message) {
