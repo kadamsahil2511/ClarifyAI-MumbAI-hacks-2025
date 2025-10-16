@@ -42,7 +42,7 @@ Each agent runs independently but shares a unified schema (`is_correct`, `confid
    - `chrome://extensions` → enable *Developer Mode* → *Load unpacked* → select the `chrome-extension` folder.
    - Pin the ClarifyAI icon for quick access.
 
-## 🧭 Using the MVP
+## 🧭 Using the extension
 1. Open the popup (`Cmd/Ctrl + Shift + F` or toolbar icon).
 2. Choose a tab:
    - **Text** – paste a claim, press *Check Fact*.
@@ -70,7 +70,7 @@ chrome-extension/
 ```
 Backend agents live one level up, keeping browser code lean and secure.
 
-## ✅ MVP Completion Criteria
+## ✅ Working Prototype
 - Works entirely offline except for calls to Gemini APIs.
 - Handles text, URL, image, and current-page checks with consistent UX.
 - Gracefully reports API downtime and rate-limit errors (429s).
@@ -81,7 +81,7 @@ Backend agents live one level up, keeping browser code lean and secure.
 - Page analysis depends on accessible HTML (paywalled or heavily scripted sites may degrade output).
 - Multimodal agent currently supports single-image uploads; batch mode is deferred to finals.
 
-## 🔭 Roadmap for Final Round
+## 🔭 Roadmap for Future features
 1. Autonomous browsing agent to gather counter-evidence.
 2. Collaborative UI that suggests follow-up questions driven by agent reasoning traces.
 3. Inline annotations injected into the DOM via `content.js` for transparent fact labels.
